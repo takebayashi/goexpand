@@ -32,3 +32,16 @@ func TestExpand(t *testing.T) {
 	testEq(t, Expand("foo[0:1][0:1]"), []string{"foo00", "foo01", "foo10", "foo11"})
 	testEq(t, Expand("foo[0:1][0:1],bar[00:01]"), []string{"foo00", "foo01", "foo10", "foo11", "bar00", "bar01"})
 }
+
+func TestExpander_Expand(t *testing.T) {
+	ex, err := NewExpander("{{", "}}", "..")
+	if err != nil {
+		t.Error(err)
+	}
+	testEq(t, ex.Expand("foo"), []string{"foo"})
+	testEq(t, ex.Expand("foo,bar"), []string{"foo", "bar"})
+	testEq(t, ex.Expand("foo{{0..2}}bar"), []string{"foo0bar", "foo1bar", "foo2bar"})
+	testEq(t, ex.Expand("foo{{00..02}}"), []string{"foo00", "foo01", "foo02"})
+	testEq(t, ex.Expand("foo{{0..1}}{{0..1}}"), []string{"foo00", "foo01", "foo10", "foo11"})
+	testEq(t, ex.Expand("foo{{0..1}}{{0..1}},bar{{00..01}}"), []string{"foo00", "foo01", "foo10", "foo11", "bar00", "bar01"})
+}
